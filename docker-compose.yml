@@ -1,8 +1,9 @@
-version: '3.7'
+version: '3.3'
 #The services refer the images or programs which we want to run
 services:
   #First we will install te mariaDB in our system
   mariaDB:
+    image: mariadb_personal:V00
     #loading the environment from the environment file.
     env_file:
       - ./common.env
@@ -16,7 +17,7 @@ services:
     #We will give the name to our image with tag image_name:tag
     #images: nextcloud_DB:version-00
     #We can name the running container by gining in the container name. Usually the name of the containers are unique, so this cannot be used in swamp mode. This variable comes from the common.env file.
-      container_name: $NAME
+    container_name: nextcloud_DB
     #Defining the internal docker network which the container needs to join
     networks:
       - nextcloudNetwork
@@ -28,14 +29,15 @@ services:
       driver: "json-file"
 
   nextcloud:
+    #The following container depends in the Database. Therefor first the mariaDb should be up.
+    depends_on:
+      - mariaDB
     #loading the environment from the environment file. We can see to set environment variable by the following 2 types.
     env_file:
       - ./common.env
     environment:
-      - MYSQL_HOST=$NAME
-    #The following container depends in the Database. Therefor first the mariaDb should be up.
-    depends_on:
-      - mariaDB
+      - MYSQL_HOST=nextcloud_DB
+    image: nextcloud_personal:V00  
     #Building the nextcloud from the below context. From current directory go in Next_cloud folder to find the docker file
     build:
       context: ./Next_cloud
@@ -45,7 +47,7 @@ services:
     #We will give the name to our image with tag image_name:tag
     #images: nextcloud_DB:version-00
     #We can name the running container by gining in the container name. Usually the name of the containers are unique, so this cannot be used in swamp mode
-      container_name: nextcloud_DB
+    container_name: nextcloud_service
     #Defining the internal docker network which the container needs to join
     networks:
       - nextcloudNetwork
@@ -61,4 +63,5 @@ services:
 
 #Creating the docker network
 networks:
-  nextcloudNetwork
+  nextcloudNetwork:
+    driver: bridge
