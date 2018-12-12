@@ -1,0 +1,61 @@
+version: '3.7'
+#The services refer the images or programs which we want to run
+services:
+  #First we will install te mariaDB in our system
+  mariaDB:
+    #loading the environment from the environment file.
+    env_file:
+      - ./common.env
+      - ./mariaDB/mariaDB.env
+    #Building the mariaDB from the below context. From current directory go in mariaDB folder to find the docker file
+    build:
+      context: ./mariaDB
+      labels:
+        #We can specify labels for our images or containers being created. Naming convention is reverse of the domain name.
+        com.tec2home.com: "This is created for automatic installation of database software for the nextcloud software on raspberry pi using docker"
+    #We will give the name to our image with tag image_name:tag
+    #images: nextcloud_DB:version-00
+    #We can name the running container by gining in the container name. Usually the name of the containers are unique, so this cannot be used in swamp mode. This variable comes from the common.env file.
+      container_name: $NAME
+    #Defining the internal docker network which the container needs to join
+    networks:
+      - nextcloudNetwork
+    deploy:
+      restart_policy:
+        condition: on-failure
+    #To get the logs for the service
+    logging:
+      driver: "json-file"
+
+  nextcloud:
+    #loading the environment from the environment file. We can see to set environment variable by the following 2 types.
+    env_file:
+      - ./common.env
+    environment:
+      - MYSQL_HOST=$NAME
+    #Building the nextcloud from the below context. From current directory go in Next_cloud folder to find the docker file
+    build:
+    #The following container depends in the Database. Therefor first the mariaDb should be up.
+      depends_on:
+        - mariaDB
+      context: ./Next_cloud
+      labels:
+        #We can specify labels for our images or containers being created. Naming convention is reverse of the domain name.
+        com.tec2home.com: "This is created for automatic installation of nextcloud software on raspberry pi using docker"
+    #We will give the name to our image with tag image_name:tag
+    #images: nextcloud_DB:version-00
+    #We can name the running container by gining in the container name. Usually the name of the containers are unique, so this cannot be used in swamp mode
+      container_name: nextcloud_DB
+    #Defining the internal docker network which the container needs to join
+    networks:
+      - nextcloudNetwork
+    deploy:
+      restart_policy:
+        condition: on-failure
+    #To get the logs for the service
+    logging:
+      driver: "json-file"
+
+#Creating the docker network
+networks:
+  nextcloudNetwork

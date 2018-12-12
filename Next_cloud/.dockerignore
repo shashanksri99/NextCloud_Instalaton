@@ -1,0 +1,2 @@
+# This ignore all the environment file as not needed on build. The environment file is included in docker compose.
+*.env
