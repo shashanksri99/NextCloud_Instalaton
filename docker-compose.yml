@@ -33,11 +33,11 @@ services:
       - ./common.env
     environment:
       - MYSQL_HOST=$NAME
+    #The following container depends in the Database. Therefor first the mariaDb should be up.
+    depends_on:
+      - mariaDB
     #Building the nextcloud from the below context. From current directory go in Next_cloud folder to find the docker file
     build:
-    #The following container depends in the Database. Therefor first the mariaDb should be up.
-      depends_on:
-        - mariaDB
       context: ./Next_cloud
       labels:
         #We can specify labels for our images or containers being created. Naming convention is reverse of the domain name.
@@ -49,7 +49,7 @@ services:
     #Defining the internal docker network which the container needs to join
     networks:
       - nextcloudNetwork
-    #This would expose the nextcloud port  
+    #This would expose the nextcloud port
     expose:
       - "4320"
     deploy:
