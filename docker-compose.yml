@@ -49,6 +49,9 @@ services:
     #Defining the internal docker network which the container needs to join
     networks:
       - nextcloudNetwork
+    #This would expose the nextcloud port  
+    expose:
+      - "4320"
     deploy:
       restart_policy:
         condition: on-failure
